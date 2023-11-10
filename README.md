@@ -1,4 +1,4 @@
-## "Lazy" Metamorphic Deployment Demo script
+## "Lazy" Metamorphic Deployment Demo
 
 Want to deploy a contract that can be upgradable, without using a proxy or clone?
 
@@ -29,8 +29,8 @@ Now the Factories nonce is 0 and deploying a new contract using create will resu
 Modified to accept a constructor argument for demo purposes
 
 ### Factory.sol
-The Factory contract which is deployed via create2() using a specific salt.
-This contract has a deploy() method that allows for deploying contracts bytecode
+The Factory contract which is deployed via create2() using a salt.
+This contract has a deploy() method that allows for deploying contracts by supplying bytecode.
 
 ### DeployFactory.s.sol
 create2 deployment script for the Factory contract.
@@ -44,16 +44,12 @@ Demo script that puts it all together.
 ```
 DumbMetamorphicFactory$ export SALT=fuck
 DumbMetamorphicFactory$ forge script script/demo.s.sol 
-[⠒] Compiling...
-No files changed, compilation skipped
-Script ran successfully.
-Gas used: 266411
-
+...
 == Logs ==
   created Factory: 0x4C754bEc5EEcda1C13083732DDefc0D4f80ed77c
   salt: fuck
   Counter(1337) Address: 0x31591CCb029aa4875D6A7f6e6896521a23A29CD6
-  
+
   Redeployed Factory: 0x4C754bEc5EEcda1C13083732DDefc0D4f80ed77c
   salt: fuck
   Counter(1234) Address: 0x31591CCb029aa4875D6A7f6e6896521a23A29CD6
