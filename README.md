@@ -11,7 +11,9 @@ Metamorphic contracts might be right for you.
 To understand how to morph contracts you need to understand these three EVM instructions:
 
 ```create``` : computes the address using the sender's address and a nonce, which is incremented with each transaction. 
+
 ```create2``` : the address is computed using four parameters: a 0xFF constant, the sender's address, a salt (which is a random value from the sender), and the bytecode of the contract.  
+
 ```selfdestruct``` : removes code at address and resets the nonce to 0 (also sends the balance to a specified address).  
 
 Deploy a Factory contract via create2 using a salt "xxxx".
