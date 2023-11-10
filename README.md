@@ -1,66 +1,60 @@
-## Foundry
+## "Lazy" Metamorphic Deployment Demo script
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+Want to deploy a contract that can be upgradable, without using a proxy or clone?
 
-Foundry consists of:
+Want to hardcode all your state variables and save gas avoiding sload() in calls while also allowing for upgrading/changing contract code?
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+Metamorphic contracts might be right for you.
 
-## Documentation
+## Explanation: 
 
-https://book.getfoundry.sh/
+To understand how to morph contracts you need to understand these three EVM instructions:
 
-## Usage
+```create``` : computes the address using the sender's address and a nonce, which is incremented with each transaction. 
+```create2``` : the address is computed using four parameters: a 0xFF constant, the sender's address, a salt (which is a random value from the sender), and the bytecode of the contract.
+```selfdestruct``` : removes code at address and resets the nonce to 0 (also sends the balance to a specified address).
 
-### Build
+Deploy a Factory contract via create2 using a salt "xxxx".
 
-```shell
-$ forge build
+Deploy a contract from the deployed Factory contract using create() via the deploy() method. 
+This will use the Factory contracts nonce for the future contracts address. Setting the contracts nonce to 1.
+
+Destruct the Deployed contract. - Removes code at the address sets nonce to 0.
+Destruct the Factory contract. - Removes code and resets the nonce to 0.
+
+Redeploy the Factory contract using the same salt. 
+Now the Factories nonce is 0 and deploying a new contract using create will result in the same address being used as the previous address before selfdestruct(). 
+
+### Counter.sol
+Modified to accept a constructor argument for demo purposes
+
+### Factory.sol
+The Factory contract which is deployed via create2() using a specific salt.
+This contract has a deploy() method that allows for deploying contracts bytecode
+
+### DeployFactory.s.sol
+create2 deployment script for the Factory contract.
+
+### GetContractCode.s.sol
+Returns the contracts creation code + encoded constructor arguments
+
+### demo.s.sol
+Demo script that puts it all together. 
+
 ```
+DumbMetamorphicFactory$ export SALT=fuck
+DumbMetamorphicFactory$ forge script script/demo.s.sol 
+[⠒] Compiling...
+No files changed, compilation skipped
+Script ran successfully.
+Gas used: 266411
 
-### Test
-
-```shell
-$ forge test
-```
-
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
+== Logs ==
+  created Factory: 0x4C754bEc5EEcda1C13083732DDefc0D4f80ed77c
+  salt: fuck
+  Counter(1337) Address: 0x31591CCb029aa4875D6A7f6e6896521a23A29CD6
+  
+  Redeployed Factory: 0x4C754bEc5EEcda1C13083732DDefc0D4f80ed77c
+  salt: fuck
+  Counter(1234) Address: 0x31591CCb029aa4875D6A7f6e6896521a23A29CD6
 ```
